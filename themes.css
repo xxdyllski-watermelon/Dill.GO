@@ -1,0 +1,80 @@
+/*
+ * themes.css - daftar tema. Setiap tema hanya mengubah variabel warna (CSS variables),
+ * sehingga seluruh tampilan ikut berubah. Mau menambah tema? Salin satu blok,
+ * ganti nama di [data-theme="..."], ubah warnanya, lalu tambahkan juga
+ * di array THEMES pada js/theme.js agar muncul di tab Tema.
+ *
+ * Arti variabel:
+ *   --primary / --primary-deep : warna utama dan versi lebih gelapnya
+ *   --on-primary               : warna teks di atas warna utama
+ *   --accent / --on-accent     : warna aksen (kuning pada tema bawaan)
+ *   --pink                     : titik dekoratif kecil
+ *   --soft / --soft-ink        : kartu sambutan dan teks di atasnya
+ *   --bg                       : warna latar halaman
+ *   --surface / --field        : warna kartu dan kolom isian
+ *   --ink / --muted / --line   : teks utama, teks redup, garis pemisah
+ */
+
+:root,
+[data-theme="indigo"] {
+  --primary: #5050bf; --primary-deep: #3d3da6; --on-primary: #ffffff;
+  --accent: #ffd966; --on-accent: #3a2f00; --pink: #ff93b0;
+  --soft: #fde8cf; --soft-ink: #1f1f3d;
+  --bg: #e2e4ff; --surface: #ffffff; --field: #f2f3ff;
+  --ink: #1f1f3d; --muted: #6b6b8f; --line: #e3e4f5;
+  --shadow: 0 12px 30px rgba(80, 80, 191, 0.18);
+}
+
+[data-theme="sunset"] {
+  --primary: #e8590c; --primary-deep: #c2410c; --on-primary: #ffffff;
+  --accent: #ffd43b; --on-accent: #3a2f00; --pink: #ff8787;
+  --soft: #ffe8d6; --soft-ink: #3b1f0e;
+  --bg: #ffecd9; --surface: #ffffff; --field: #fff4ea;
+  --ink: #3b1f0e; --muted: #8a6a55; --line: #f7dcc5;
+  --shadow: 0 12px 30px rgba(232, 89, 12, 0.2);
+}
+
+[data-theme="forest"] {
+  --primary: #2b8a5a; --primary-deep: #1f6f47; --on-primary: #ffffff;
+  --accent: #ffe066; --on-accent: #3a2f00; --pink: #ffa8a8;
+  --soft: #e3f3d3; --soft-ink: #12301f;
+  --bg: #dff3e6; --surface: #ffffff; --field: #eef8f1;
+  --ink: #12301f; --muted: #5f7f6b; --line: #d3eadb;
+  --shadow: 0 12px 30px rgba(43, 138, 90, 0.2);
+}
+
+[data-theme="ocean"] {
+  --primary: #0b7285; --primary-deep: #095c6b; --on-primary: #ffffff;
+  --accent: #ffd8a8; --on-accent: #3a2200; --pink: #ff9ec4;
+  --soft: #d3f0f7; --soft-ink: #0b2e36;
+  --bg: #d9f1f7; --surface: #ffffff; --field: #ebf8fb;
+  --ink: #0b2e36; --muted: #5a808a; --line: #cde8ef;
+  --shadow: 0 12px 30px rgba(11, 114, 133, 0.2);
+}
+
+[data-theme="rose"] {
+  --primary: #c2255c; --primary-deep: #a61e4d; --on-primary: #ffffff;
+  --accent: #ffe3a3; --on-accent: #3a2a00; --pink: #ff8fb1;
+  --soft: #ffe0ea; --soft-ink: #3d1224;
+  --bg: #ffe3ec; --surface: #ffffff; --field: #fff0f5;
+  --ink: #3d1224; --muted: #8f5f72; --line: #f8d3df;
+  --shadow: 0 12px 30px rgba(194, 37, 92, 0.2);
+}
+
+[data-theme="mocha"] {
+  --primary: #7a5230; --primary-deep: #5e3f24; --on-primary: #ffffff;
+  --accent: #f5c26b; --on-accent: #3a2500; --pink: #e8a39a;
+  --soft: #f3e5d3; --soft-ink: #2f2013;
+  --bg: #efe3d3; --surface: #ffffff; --field: #f8f1e8;
+  --ink: #2f2013; --muted: #7d6a58; --line: #e6d6c2;
+  --shadow: 0 12px 30px rgba(122, 82, 48, 0.2);
+}
+
+[data-theme="night"] {
+  --primary: #8c8cf2; --primary-deep: #6d6de0; --on-primary: #14142b;
+  --accent: #ffd966; --on-accent: #3a2f00; --pink: #ff93b0;
+  --soft: #2b2b52; --soft-ink: #f1f1ff;
+  --bg: #12122a; --surface: #1d1d3d; --field: #272750;
+  --ink: #f1f1ff; --muted: #a3a3cc; --line: #33335f;
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}

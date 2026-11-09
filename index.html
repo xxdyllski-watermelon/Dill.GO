@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="indigo">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dill.GO - Hitung Biaya Bensin Motor Kamu</title>
+  <meta name="description" content="Hitung biaya bensin motor pulang-pergi ke kampus per hari, minggu, bulan, dan semester. Logika perhitungan memakai Python (Pyodide).">
+  <meta name="theme-color" content="#5050bf">
+
+  <script>
+    try {
+      var t = JSON.parse(localStorage.getItem('bk:v1:theme'));
+      if (t && t.theme) document.documentElement.dataset.theme = t.theme;
+    } catch (e) {}
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="bg-layer" id="bg-layer" aria-hidden="true"></div>
+
+  <div class="app">
+  
+    <header class="hero">
+      <div class="hero-top">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <button class="avatar" id="avatar-btn" type="button" aria-label="Buka profil">
+          <span id="avatar-fallback">?</span>
+          <img id="avatar-img" alt="" hidden>
+        </button>
+      </div>
+      <div class="hero-card">
+        <span class="deco-pink" aria-hidden="true"></span>
+        <p class="eyebrow" id="hero-hello">Welcome guys,</p>
+        <h1>~Kamu manis banget </h1>
+        <p class="hero-sub" id="hero-sub">Lengkapi dulu ya profile kamu di- menu profile, biar ga ribet</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- ===== Tab 1: Kalkulator ===== -->
+      <section class="tab" id="tab-hitung" role="tabpanel" aria-label="Kalkulator">
+        <form class="card" id="calc-form" novalidate>
+          <div class="card-head">
+            <h2>Data perjalanan</h2>
+            <span class="engine" id="engine-badge" data-state="loading"><i></i><span>Memuat Python...</span></span>
+          </div>
+
+          <div class="grid-2">
+            <label class="field">
+              <span>Jarak sekali jalan (km)</span>
+              <input type="number" name="jarak" inputmode="decimal" step="0.1" min="0.1" required>
+            </label>
+            <label class="field">
+              <span>Konsumsi motor (km/L)</span>
+              <input type="number" name="konsumsi" inputmode="decimal" step="0.1" min="1" required>
+            </label>
+          </div>
+
+          <fieldset class="field">
+            <legend>Jenis bensin</legend>
+            <div class="pills">
+              <label class="pill"><input type="radio" name="bensin" value="Pertalite"><span>Pertalite</span></label>
+              <label class="pill"><input type="radio" name="bensin" value="Pertamax"><span>Pertamax</span></label>
+              <label class="pill"><input type="radio" name="bensin" value="Bensin"><span>Lainnya</span></label>
+            </div>
+          </fieldset>
+
+          <label class="field">
+            <span>Harga bensin per liter (Rp)</span>
+            <input type="number" name="harga" inputmode="numeric" step="50" min="1" required>
+            <small>Isi sesuai harga di SPBU yang biasa kamu pakai, karena harga bisa berubah.</small>
+          </label>
+
+          <div class="grid-2">
+            <label class="field">
+              <span>Hari ke kampus / minggu</span>
+              <input type="number" name="hari" inputmode="numeric" step="1" min="1" max="7" required>
+            </label>
+            <label class="field">
+              <span>Minggu kuliah / bulan</span>
+              <input type="number" name="minggu" inputmode="numeric" step="1" min="1" max="6" required>
+            </label>
+          </div>
+
+          <fieldset class="field">
+            <legend>Kondisi lalu lintas</legend>
+            <div class="pills">
+              <label class="pill"><input type="radio" name="macet" value="0"><span>Lancar</span></label>
+              <label class="pill"><input type="radio" name="macet" value="10"><span>Agak padat</span></label>
+              <label class="pill"><input type="radio" name="macet" value="25"><span>Macet</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend>Berangkat</legend>
+            <div class="pills">
+              <label class="pill"><input type="radio" name="penumpang" value="1"><span>Sendiri</span></label>
+              <label class="pill"><input type="radio" name="penumpang" value="2"><span>Boncengan (patungan)</span></label>
+            </div>
+          </fieldset>
+
+          <p class="form-error" id="form-error" role="alert" hidden></p>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Hitung</button>
+            <button type="button" class="btn btn-ghost" id="btn-reset-form">Reset</button>
+          </div>
+        </form>
+
+        <section class="card card-primary result" id="result" aria-live="polite" hidden>
+          <p class="result-label">Biaya bensin per hari (PP)</p>
+          <p class="result-big" id="res-hari">Rp 0</p>
+          <p class="result-meta" id="res-meta"></p>
+
+          <div class="result-grid">
+            <div><span>Per minggu</span><strong id="res-minggu">-</strong></div>
+            <div><span>Per bulan</span><strong id="res-bulan">-</strong></div>
+            <div><span>Per semester</span><strong id="res-semester">-</strong></div>
+            <div><span>Bensin / bulan</span><strong id="res-liter">-</strong></div>
+            <div><span>Biaya per km</span><strong id="res-km">-</strong></div>
+            <div id="res-split" hidden><span>Per orang / bulan</span><strong id="res-split-val">-</strong></div>
+          </div>
+          <p class="result-foot">Semester dihitung 16 minggu. <span id="res-engine"></span>.</p>
+        </section>
+
+        <section class="card" id="history-card" hidden>
+          <div class="card-head">
+            <h2>Riwayat hitungan</h2>
+            <button type="button" class="link-btn" id="btn-clear-history">Hapus</button>
+          </div>
+          <ul class="history" id="history-list"></ul>
+        </section>
+      </section>
+
+      <!-- ===== Tab 2: Tema ===== -->
+      <section class="tab" id="tab-tema" role="tabpanel" aria-label="Tema" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h2>Pilih tema biar ga bosen</h2>
+            <button type="button" class="link-btn" id="btn-random">Acak</button>
+          </div>
+          <div class="theme-grid" id="theme-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Atur sendiri deh</h2>
+            <button type="button" class="link-btn" id="btn-reset-colors">Reset</button>
+          </div>
+          <div class="grid-2">
+            <label class="field color-field"><span>Warna utama</span><input type="color" id="pick-primary" value="#5050bf"></label>
+            <label class="field color-field"><span>Warna aksen</span><input type="color" id="pick-accent" value="#ffd966"></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Latar belakang</h2></div>
+          <div class="pills">
+            <label class="pill"><input type="radio" name="bgmode" value="theme" checked><span>Ikuti tema</span></label>
+            <label class="pill"><input type="radio" name="bgmode" value="solid"><span>Warna</span></label>
+            <label class="pill"><input type="radio" name="bgmode" value="gradient"><span>Gradien</span></label>
+            <label class="pill"><input type="radio" name="bgmode" value="image"><span>Gambar</span></label>
+          </div>
+
+          <div class="bg-panel" data-panel="solid" hidden>
+            <label class="field color-field"><span>Warna latar</span><input type="color" id="bg-c1" value="#e2e4ff"></label>
+          </div>
+
+          <div class="bg-panel" data-panel="gradient" hidden>
+            <div class="grid-2">
+              <label class="field color-field"><span>Warna awal</span><input type="color" id="bg-g1" value="#e0e3ff"></label>
+              <label class="field color-field"><span>Warna akhir</span><input type="color" id="bg-g2" value="#fde8cf"></label>
+            </div>
+            <div class="gradient-presets" id="gradient-presets"></div>
+          </div>
+
+          <div class="bg-panel" data-panel="image" hidden>
+            <label class="btn btn-ghost file-btn">
+              Pilih gambar dari perangkat
+              <input type="file" id="bg-file" accept="image/*" hidden>
+            </label>
+            <button type="button" class="link-btn" id="btn-remove-bg">Hapus gambar</button>
+            <small class="hint">Gambar diperkecil otomatis dan hanya disimpan di perangkatmu.</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Tab 3: Profil ===== -->
+      <section class="tab" id="tab-profil" role="tabpanel" aria-label="Profil" hidden>
+        <form class="card" id="profile-form" novalidate>
+          <div class="card-head"><h2>Profil Kamu</h2></div>
+
+          <div class="profile-photo">
+            <div class="avatar avatar-lg">
+              <span id="profile-fallback">?</span>
+              <img id="profile-img" alt="Foto profil" hidden>
+            </div>
+            <div class="profile-photo-actions">
+              <label class="btn btn-ghost file-btn">
+                Ganti foto biar kece
+                <input type="file" id="photo-file" accept="image/*" hidden>
+              </label>
+              <button type="button" class="link-btn" id="btn-remove-photo">Hapus foto</button>
+            </div>
+          </div>
+
+          <label class="field"><span>Nama</span><input type="text" name="nama" maxlength="60" autocomplete="name"></label>
+          <label class="field"><span>Kampus</span><input type="text" name="kampus" maxlength="60"></label>
+          <label class="field"><span>Program studi</span><input type="text" name="prodi" maxlength="60" placeholder="contoh: Sistem Informasi"></label>
+          <label class="field"><span>Motor</span><input type="text" name="motor" maxlength="60" placeholder="contoh: Honda Beat 2026"></label>
+
+          <p class="section-note">Isi dengan yang biasa alami di jalan (opsional)</p>
+          <div class="grid-2">
+            <label class="field"><span>Jarak sekali jalan (km)</span><input type="number" name="jarak" inputmode="decimal" step="0.1" min="0"></label>
+            <label class="field"><span>Konsumsi (km/L)</span><input type="number" name="konsumsi" inputmode="decimal" step="0.1" min="0"></label>
+          </div>
+          <label class="field"><span>Harga bensin per liter (Rp)</span><input type="number" name="harga" inputmode="numeric" step="50" min="0"></label>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Simpan!</button>
+          </div>
+        </form>
+
+        <div class="card">
+          <div class="card-head"><h2>Data di perangkat ini</h2></div>
+          <p class="muted">Profil, tema, dan riwayat hanya tersimpan di browser kamu dan tidak dikirim ke server kami</p>
+          <button type="button" class="btn btn-danger" id="btn-clear-all">Hapus semua data</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">#copyright @dillski`s</footer>
+  </div>
+
+  <!-- ===== Navigasi bawah ===== -->
+  <nav class="tabbar" aria-label="Navigasi utama">
+    <button type="button" data-tab="hitung" class="active" aria-selected="true" aria-label="Hitung">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8.5 7.5h7M8.5 12h2M13.5 12h2M8.5 16h2M13.5 16h2"/></svg>
+      <span>Hitung</span>
+    </button>
+    <button type="button" data-tab="tema" aria-selected="false" aria-label="Tema">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.6-2.1-.5-1.3.2-2.4 1.6-2.4H17a4 4 0 0 0 4-4C21 6.9 17 3 12 3Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="15" cy="8" r="1"/></svg>
+      <span>Tema</span>
+    </button>
+    <button type="button" data-tab="profil" aria-selected="false" aria-label="Profil">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg>
+      <span>Profil</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Urutan penting: fungsi bantu dulu, aplikasi utama terakhir -->
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/fallback.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
